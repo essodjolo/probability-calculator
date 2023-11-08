@@ -17,16 +17,38 @@ class MyTestCase(unittest.TestCase):
         self.assertEqual(21, num_balls_drawn)
 
     def test_experiment(self):
-        hat = Hat(black=6, red=4, green=3)
+        # A case where we don't know the result for sure
+        # At least we know that 0 <= probability <= 1
+        hat = Hat(black=16, red=14, green=13)
         probability = experiment(
             hat=hat,
             expected_balls={"red": 2, "green": 1},
             num_balls_drawn=5,
-            num_experiments=2000
+            num_experiments=4500
         )
         # We don't know what the result will be but at least we know it's should be in [0; 1]
-        self.assertLessEqual(1, probability)
-        self.assertGreaterEqual(0, probability)
+        self.assertLessEqual(probability, 1)
+        self.assertGreaterEqual(probability, 0)
+
+        # A case where we should have 0
+        hat = Hat(black=6, red=4, green=3)
+        probability = experiment(
+            hat=hat,
+            expected_balls={"red": 7},
+            num_balls_drawn=2,
+            num_experiments=3
+        )
+        self.assertEqual(0, probability)
+
+        # A case where we should have 1
+        hat = Hat(red=4)
+        probability = experiment(
+            hat=hat,
+            expected_balls={"red": 2},
+            num_balls_drawn=2,
+            num_experiments=3
+        )
+        self.assertEqual(1, probability)
 
 
 if __name__ == '__main__':

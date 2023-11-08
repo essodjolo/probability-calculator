@@ -1,13 +1,24 @@
 import random
 from collections import Counter
+from copy import copy
 
 
 class Hat:
+    """
+    A hat will always be created with at least one ball.
+    The arguments passed into the hat object upon creation should be converted to a contents instance variable.
+    contents should be a list of strings containing one item for each ball in the hat.
+    Each item in the list should be a color name representing a single ball of that color.
+    For example, if the hat is {"red": 2, "blue": 1}, contents should be ["red", "red", "blue"].
+    """
     def __init__(self, **kwargs: {str: int}):
         self.contents: list[str] = []
         for color, number in kwargs.items():
             for i in range(number):
                 self.contents.append(color)
+
+    def __repr__(self):
+        return str(self.contents)
 
     def draw(self, num_balls_drawn: int) -> {str: int}:
         """
@@ -31,10 +42,37 @@ class Hat:
             return balls_drawn
 
 
+def convert_to_flattened_list(balls_dict: {str: int}, resulting_list: list[str]):
+    for color, number in balls_dict.items():
+        for i in range(number):
+            resulting_list.append(color)
+
+
 def experiment(
         hat: 'Hat',
         expected_balls: {str: int},
         num_balls_drawn: int,
         num_experiments: int
-):
-    return 2
+) -> float:
+
+    # if no experiment is done then probability is set to 0
+    if num_experiments == 0:
+        return 0.0
+
+    num_matching_balls: int = 0
+
+    for i in range(num_experiments):
+        copy_of_hat = copy(hat)
+        actual_balls_drawn = copy_of_hat.draw(num_balls_drawn)
+
+        score: int = 1
+        for color, number in expected_balls.items():
+            if number <= actual_balls_drawn.get(color, 0):
+                score *= 1  # Should stay in this condition for ALL iteration to keep the value 1.
+            else:
+                score *= 0  # If we fall in this condition for at least one time, then score will be 0
+
+        num_matching_balls += score
+
+    probability = float(num_matching_balls/num_experiments)
+    return probability
